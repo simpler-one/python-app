@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: python-flask-service
+spec:
+  selector:
+    app: python-app
+  ports:
+  - port: 8080
+    targetPort: 5000
