@@ -39,16 +39,16 @@ jobs:
           chmod +x argocd
           sudo mv argocd /usr/local/bin/argocd
 
-      - name: get admin password of argocd
-        run: |
-          # 1. Extract and decode the password into a variable
-          ARGOCD_PASS=$(kubectl get secret argocd-initial-admin-secret -n argocd -o yaml | grep -oP '(?<=password: ).*' | base64 - d) 
+      # - name: get admin password of argocd
+      #   run: |
+      #     # 1. Extract and decode the password into a variable
+      #     ARGOCD_PASS=$(kubectl get secret argocd-initial-admin-secret -n argocd -o yaml | grep -oP '(?<=password: ).*' | base64 - d) 
           
-          # 2. Mask it so it appears as *** in GitHub logs
-          echo "::add-mask::$ARGOCD_PASS"
+      #     # 2. Mask it so it appears as *** in GitHub logs
+      #     echo "::add-mask::$ARGOCD_PASS"
           
-          # 3. Save it to the environment file
-          echo "ADMIN_PASSWORD=$ARGOCD_PASS" >> "$GITHUB_ENV"
+      #     # 3. Save it to the environment file
+      #     echo "ADMIN_PASSWORD=$ARGOCD_PASS" >> "$GITHUB_ENV"
       
       - name: argocd login 
         run: |
@@ -59,7 +59,7 @@ jobs:
           --password ${{ vars.ARGOCD_PASSWORD }}
 
       - name: getting artifacts
-        uses: github/checkout@v4
+        uses: actions/checkout@v4
 
       - name: deploying repo and application argocd configs
         run: |
