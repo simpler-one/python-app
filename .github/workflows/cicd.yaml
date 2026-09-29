@@ -1,0 +1,75 @@
+name: cicd
+
+on:
+  push:
+    paths: 
+      - src/**
+    branches:
+      - master
+
+jobs:
+  ci:
+    runs-on: ubuntu_latest
+    steps:
+      -
+        name: Shorten Commit ID
+        shell: bash
+        run: |
+          echo "COMMIT_ID=${GITHUB_SHA::6}" >> "$GITHUB_ENV"
+      -
+        name: Login to Docker Hub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      -
+        name: Build and push
+        uses: docker/build-push-action@v7
+        with:
+          push: true
+          tags: dhyey0208/python-app:${{  env.COMMIT_ID  }}
+
+  cd:
+    needs: ci
+    runs-on: self-hosted
+    steps:
+      - name: installing ArgoCD
+        run: |
+          curl -KsSL -o argocd https://argocd-server.argocd/download/argocd-linux-amd64
+          chmod +x argocd
+          sudo mv argocd /usr/local/bin/argocd
+
+      - name: get admin password of argocd
+        run: |
+          # 1. Extract and decode the password into a variable
+          ARGOCD_PASS=$(kubectl get secret argocd-initial-admin-secret -n argocd -o yaml | grep -oP '(?<=password: ).*' | base64 - d) 
+          
+          # 2. Mask it so it appears as *** in GitHub logs
+          echo "::add-mask::$ARGOCD_PASS"
+          
+          # 3. Save it to the environment file
+          echo "ADMIN_PASSWORD=$ARGOCD_PASS" >> "$GITHUB_ENV"
+      
+      - name: argocd login 
+        run: |
+          argocd login argocd-server.argocd \
+          --insecure \
+          --grpc-web \
+          --username admin \
+          --password ${{ vars.ARGOCD_PASSWORD }}
+
+      - name: getting artifacts
+        uses: github/checkout@v4
+
+      - name: deploying repo and application argocd configs
+        run: |
+          # 1. Register repository (Optional for public repos, required for private)
+          argocd repo add ${{ vars.APP_CHART_REPO }} --insecure
+
+          # 2. Create Application from declarative YAML spec
+          argocd app create -f argocd-manifests/application.yaml --insecure
+        ##
+      - name: sync application
+        run: |
+            APP_NAME=$(argocd app list -o name | grep "python-app")
+            argocd app sync "$APP_NAME"
