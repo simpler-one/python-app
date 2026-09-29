@@ -56,7 +56,7 @@ jobs:
           --insecure \
           --grpc-web \
           --username admin \
-          --password ${{ vars.ARGOCD_PASSWORD }}
+          --password ${{ secrets.ARGOCD_PASSWORD }}
 
       - name: getting artifacts
         uses: actions/checkout@v4
