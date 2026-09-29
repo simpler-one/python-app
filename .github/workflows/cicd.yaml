@@ -73,6 +73,7 @@ jobs:
           # 2. Create Application from declarative YAML spec
           argocd app create -f argocd-manifests/application.yaml \
           --parameter image.tag=${{ needs.ci.outputs.latest_tag }} \
+          --upsert \
           --insecure
         ##
       - name: sync application
