@@ -67,9 +67,14 @@ jobs:
 
       - name: update app chart values
         run: |
-          sudo apt update
-          sudo apt install -y python3 python3-pip python3-venv
-          sudo pip install yq
+          # sudo apt update
+          # sudo apt install -y python3 python3-pip python3-venv
+          # sudo pip install yq
+
+          sudo apt update && sudo apt install wget -y
+          sudo wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq
+          sudo chmod +x /usr/local/bin/yq
+
           yq -Yi '.image.tag = "${{ needs.ci.outputs.latest_tag }}"' charts/python-app/values.yaml
 
       - name: commit changes
