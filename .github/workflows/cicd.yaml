@@ -65,6 +65,16 @@ jobs:
       - name: getting artifacts
         uses: actions/checkout@v4
 
+      - name: update app chart values
+        run: |
+          pip install yq
+          yq -Yi '.image.tag = "${{ needs.ci.outputs.latest_tag }}"' charts/python-app/values.yaml
+
+      - name: commit changes
+        uses: EndBug/add-and-commit@v9
+        with: 
+          message: 'update values.yaml with commit ${{  needs.ci.outputs.latest_tag  }}'
+
       - name: deploying repo and application argocd configs
         run: |
           # 1. Register repository (Optional for public repos, required for private)
@@ -72,8 +82,6 @@ jobs:
 
           # 2. Create Application from declarative YAML spec
           argocd app create -f argocd-manifests/application.yaml \
-          --parameter image.tag=${{ needs.ci.outputs.latest_tag }} \
-          --upsert \
           --insecure
         ##
       - name: sync application
