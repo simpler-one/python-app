@@ -75,7 +75,7 @@ jobs:
       - name: commit changes
         uses: EndBug/add-and-commit@v9
         with: 
-          message: 'update values.yaml with commit ${{  needs.ci.outputs.latest_tag  }}'
+          message: 'update values file with commit ${{  needs.ci.outputs.latest_tag  }}'
 
       - name: deploying repo and application argocd configs
         run: |
