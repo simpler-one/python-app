@@ -1,14 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: ${{values.app_name}}
+  name: python-app
   namespace: argocd
 spec:
   project: default
   source:
-    repoURL: https://github.com/simpler-one/${{values.app_name}}.git
+    repoURL: https://github.com/simpler-one/python-app.git
     targetRevision: master
-    path: charts/${{values.app_name}}           # Folder in your repo containing K8s YAML files or Helm charts
+    path: charts/python-app           # Folder in your repo containing K8s YAML files or Helm charts
   destination:
     server: https://kubernetes.default.svc
     namespace: python         # Target namespace where Flask pods will run
