@@ -11,7 +11,9 @@ def info():
         "hostname": socket.gethostname(),
         "time": datetime.datetime.now().strftime("%I:%M:%S%p on %B %D, %Y"),
         "message": "you are doing great, human!! ::|)",
-        "deployed_on": "K8s"
+        "deployed_on": "K8s",
+        "env": "${{values.app_env}}",
+        "app_name": "${{values.app_name}}"
     })
 
 @app.route('/api/v1/healthz')
